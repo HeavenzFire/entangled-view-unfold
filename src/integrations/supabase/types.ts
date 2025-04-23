@@ -36,6 +36,33 @@ export type Database = {
         }
         Relationships: []
       }
+      emf_readings: {
+        Row: {
+          frequency: number | null
+          id: string
+          metadata: Json | null
+          reading_value: number
+          sensor_id: string | null
+          timestamp: string
+        }
+        Insert: {
+          frequency?: number | null
+          id?: string
+          metadata?: Json | null
+          reading_value: number
+          sensor_id?: string | null
+          timestamp?: string
+        }
+        Update: {
+          frequency?: number | null
+          id?: string
+          metadata?: Json | null
+          reading_value?: number
+          sensor_id?: string | null
+          timestamp?: string
+        }
+        Relationships: []
+      }
       heavenzfire_content: {
         Row: {
           content: string
