@@ -3,9 +3,10 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { Terminal as TerminalIcon, Play, Delete, Code, Save } from 'lucide-react';
+import { Terminal as TerminalIcon, Play, Delete, Code, Save, Database, Cpu } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { executeQuantumAlgorithm } from '@/utils/quantumSimulator';
 
 interface CommandResponse {
   output: string;
@@ -17,6 +18,7 @@ const Terminal = () => {
   const [input, setInput] = useState<string>('');
   const [history, setHistory] = useState<Array<{command: string, response: CommandResponse}>>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [mode, setMode] = useState<'classical' | 'quantum' | 'hybrid'>('classical');
   const terminalEndRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
 
@@ -37,14 +39,17 @@ const Terminal = () => {
     setIsLoading(true);
     
     try {
-      // In a real implementation, this would connect to a backend service
-      // that can execute code in various languages
-      
-      // For demo purposes, we'll simulate code execution with a timeout
       const startTime = performance.now();
       
-      // Mock command execution - in production this would call your backend
-      const response = await simulateExecution(input);
+      // Execute command based on the current mode
+      let response: CommandResponse;
+      
+      if (mode === 'quantum' || (mode === 'hybrid' && input.toLowerCase().includes('quantum'))) {
+        response = await executeQuantumAlgorithm(input);
+      } else {
+        // Use the existing simulation for classical or non-quantum hybrid commands
+        response = await simulateExecution(input);
+      }
       
       const executionTime = Math.round(performance.now() - startTime);
       
@@ -100,7 +105,6 @@ const Terminal = () => {
   };
 
   // This is a mock function to simulate code execution
-  // In a real app, this would call your backend execution service
   const simulateExecution = async (code: string): Promise<CommandResponse> => {
     return new Promise((resolve) => {
       setTimeout(() => {
@@ -118,6 +122,31 @@ const Terminal = () => {
           resolve({
             output: 'Current EMF Reading: ' + (Math.random() * 100 + 50).toFixed(2) + ' μT'
           });
+        } else if (code.toLowerCase().includes('qaoa')) {
+          resolve({
+            output: 'Executing Quantum Approximate Optimization Algorithm...\n\n' +
+                   'Problem: MaxCut on 10-node graph\n' +
+                   'Iterations: 100\n' +
+                   'Final approximation ratio: 0.9342\n' +
+                   'Solution: [1, 0, 1, 0, 1, 0, 1, 0, 0, 1]'
+          });
+        } else if (code.toLowerCase().includes('vqe')) {
+          resolve({
+            output: 'Executing Variational Quantum Eigensolver...\n\n' +
+                   'Molecule: H2\n' +
+                   'Converged energy: -1.137 Hartree\n' +
+                   'Bond length: 0.735 angstroms\n' +
+                   'Iterations: 35'
+          });
+        } else if (code.toLowerCase().includes('qnn')) {
+          resolve({
+            output: 'Training Quantum Neural Network...\n\n' +
+                   'Dataset: MNIST digits (subset)\n' +
+                   'Quantum layers: 3\n' +
+                   'Classical layers: 2\n' +
+                   'Training accuracy: 92.7%\n' +
+                   'Test accuracy: 89.3%'
+          });
         } else {
           resolve({
             output: `Executed:\n${code}\n\nSuccess! This is a simulated response.`
@@ -133,6 +162,34 @@ const Terminal = () => {
         <div className="flex items-center space-x-2">
           <TerminalIcon className="h-5 w-5" />
           <h3 className="text-sm font-mono">Quantum Terminal</h3>
+          <div className="flex items-center space-x-1 ml-4">
+            <Button 
+              variant={mode === 'classical' ? 'secondary' : 'ghost'}
+              size="sm"
+              className="h-7 px-2 py-1 text-xs"
+              onClick={() => setMode('classical')}
+            >
+              Classical
+            </Button>
+            <Button 
+              variant={mode === 'quantum' ? 'secondary' : 'ghost'}
+              size="sm"
+              className="h-7 px-2 py-1 text-xs"
+              onClick={() => setMode('quantum')}
+            >
+              <Cpu className="h-3 w-3 mr-1" />
+              Quantum
+            </Button>
+            <Button 
+              variant={mode === 'hybrid' ? 'secondary' : 'ghost'}
+              size="sm"
+              className="h-7 px-2 py-1 text-xs"
+              onClick={() => setMode('hybrid')}
+            >
+              <Database className="h-3 w-3 mr-1" />
+              Hybrid
+            </Button>
+          </div>
         </div>
         <div className="flex space-x-1">
           <Button
@@ -163,7 +220,13 @@ const Terminal = () => {
       <div className="bg-gray-950 text-gray-100 p-4 font-mono text-sm overflow-y-auto flex-1 min-h-[200px] max-h-[400px]">
         {history.length === 0 && (
           <div className="text-gray-500 italic">
-            Type a command and press Enter to execute. Try "hello" or "emf" for demo responses.
+            {mode === 'quantum' ? (
+              <span>Type a quantum algorithm command (e.g., "qaoa", "vqe", "qnn") and press Enter to execute.</span>
+            ) : mode === 'hybrid' ? (
+              <span>Execute both classical and quantum commands. Try "hello", "emf", "qaoa", or "vqe".</span>
+            ) : (
+              <span>Type a command and press Enter to execute. Try "hello" or "emf" for demo responses.</span>
+            )}
           </div>
         )}
         
@@ -201,7 +264,13 @@ const Terminal = () => {
         <div className="flex">
           <Textarea 
             className="flex-1 bg-gray-800 text-white border-gray-700 font-mono text-sm min-h-[100px] resize-none"
-            placeholder="Enter code or command here..."
+            placeholder={
+              mode === 'quantum' 
+                ? "Enter quantum algorithm (qaoa, vqe, qnn)..." 
+                : mode === 'hybrid'
+                ? "Enter classical or quantum command..."
+                : "Enter code or command here..."
+            }
             value={input}
             onChange={handleInputChange}
             onKeyDown={handleKeyDown}
@@ -226,7 +295,11 @@ const Terminal = () => {
           </div>
         </div>
         <div className="text-xs text-gray-500 mt-1 pl-1">
-          Shift+Enter to execute. Supports multiple languages via backend execution service.
+          {mode === 'quantum' 
+            ? "Shift+Enter to execute quantum simulations. Supports QAOA, VQE, and QNN." 
+            : mode === 'hybrid'
+            ? "Shift+Enter to execute. Supports hybrid quantum-classical computation simulation."
+            : "Shift+Enter to execute. Supports multiple languages via backend execution service."}
         </div>
       </div>
     </Card>

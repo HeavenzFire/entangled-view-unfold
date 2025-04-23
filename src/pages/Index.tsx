@@ -1,9 +1,9 @@
 
 import React from 'react';
-import EMFDisplay from '@/components/EMFDisplay';
-import QuantumTerminalSystem from '@/components/QuantumTerminalSystem';
+import QuantumClassicalSystem from '@/components/QuantumClassicalSystem';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { WifiHigh, Terminal } from 'lucide-react';
+import { WifiHigh } from 'lucide-react';
+import EMFDisplay from '@/components/EMFDisplay';
 
 const Index = () => {
   return (
@@ -13,14 +13,13 @@ const Index = () => {
           <h1 className="text-4xl font-bold mb-4 bg-gradient-to-r from-purple-600 to-blue-500 bg-clip-text text-transparent">
             Quantum-Classical Hybrid System
           </h1>
-          <p className="text-xl text-gray-600 dark:text-gray-400">Environmental Monitoring & Computation Interface</p>
+          <p className="text-xl text-gray-600 dark:text-gray-400">Environmental Monitoring & Quantum Computation Interface</p>
         </div>
 
-        <Tabs defaultValue="terminal" className="w-full">
+        <Tabs defaultValue="quantum" className="w-full">
           <TabsList className="grid w-full max-w-md mx-auto mb-6 grid-cols-2">
-            <TabsTrigger value="terminal">
-              <Terminal className="mr-2 h-4 w-4" />
-              Terminal System
+            <TabsTrigger value="quantum">
+              Quantum System
             </TabsTrigger>
             <TabsTrigger value="emf">
               <WifiHigh className="mr-2 h-4 w-4" />
@@ -28,8 +27,8 @@ const Index = () => {
             </TabsTrigger>
           </TabsList>
           
-          <TabsContent value="terminal" className="mt-4">
-            <QuantumTerminalSystem />
+          <TabsContent value="quantum" className="mt-4">
+            <QuantumClassicalSystem />
           </TabsContent>
           
           <TabsContent value="emf" className="mt-4">
