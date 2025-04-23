@@ -60,13 +60,11 @@ const Terminal = () => {
         }
       ]);
 
-      // Save command to Supabase
+      // Save command to Supabase using the conversations table
       try {
-        await supabase.from('command_history').insert({
-          command: input,
-          output: response.output,
-          error: response.error || null,
-          execution_time: executionTime
+        await supabase.from('conversations').insert({
+          message: input, // Use 'message' field for the command
+          response: response.output || response.error || '', // Use 'response' field for output
         });
       } catch (error) {
         console.error('Failed to save command to database:', error);
